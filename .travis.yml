@@ -1,8 +1,13 @@
 language: android
 android:
   components:
+    - tools
     - build-tools-24.0.1
-    - android-L
-    - sys-img-armeabi-v7a-android-tv-l
-    - add-on
-    - extra
+    - platform-tools
+    - extra-android-m2repository
+    - extra-google-android-support
+    - android-24
+    - sys-img-armeabi-v7a-android-25
+jdk: oraclejdk8
+os:
+  - linux
