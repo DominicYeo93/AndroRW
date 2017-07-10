@@ -3,18 +3,21 @@ package alepacheco.com.rw.apl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.security.spec.KeySpec;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class Aes {
 
 
-    public static void encryptLarge(byte[] seed, File in, File out) throws Exception {
-        SecretKeySpec skeySpec = new SecretKeySpec(getRawKey(seed), "AES");
-        Cipher cipher = Cipher.getInstance("AES");
+    public static void encryptLarge(String password, File in, File out) throws Exception {
+        SecretKeySpec skeySpec = new SecretKeySpec(getRawKey(password), "AES");
+        Cipher cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
         cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
 
         FileInputStream inputStream = new FileInputStream(in);
@@ -32,9 +35,9 @@ public class Aes {
         cis.close();
         in.delete();
     }
-    public static void decryptLarge(byte[] seed, File in, File out) throws Exception {
-        SecretKeySpec skeySpec = new SecretKeySpec(getRawKey(seed), "AES");
-        Cipher cipher = Cipher.getInstance("AES");
+    public static void decryptLarge(String password, File in, File out) throws Exception {
+        SecretKeySpec skeySpec = new SecretKeySpec(getRawKey(password), "AES");
+        Cipher cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
         cipher.init(Cipher.DECRYPT_MODE, skeySpec);
 
         FileInputStream inputStream = new FileInputStream(in);
@@ -53,33 +56,29 @@ public class Aes {
         in.delete();
     }
 
-    public static byte[] encrypt(byte[] seed, byte[] cleartext)
-            throws Exception {
-        byte[] rawKey = getRawKey(seed);
-        return encryptAes(rawKey, cleartext);
+
+    /*
+     * getRawKey does key expansion using a more secure algorithm and uses a salt to generate
+     * the Key
+     */
+    private static byte[] getRawKey(String password) throws Exception {
+        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        KeySpec spec = new PBEKeySpec(password.toCharArray(), "AndroRW".getBytes(), 65536, 256);
+        SecretKey tmp = factory.generateSecret(spec);
+        SecretKey secret = new SecretKeySpec(tmp.getEncoded(), "AES");
+        return secret.getEncoded();
     }
 
-    public static byte[] decrypt(byte[] seed, byte[] enc) throws Exception {
-        byte[] rawKey = getRawKey(seed);
-        return decryptAes(rawKey, enc);
-    }
-
-    private static byte[] getRawKey(byte[] seed) throws Exception {
-        SecretKey sKey = new SecretKeySpec(seed, "AES");
-        return sKey.getEncoded();
-    }
-
-    private static byte[] encryptAes(byte[] raw, byte[] clear) throws Exception {
-        SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
-        Cipher cipher = Cipher.getInstance("AES");
+    public static byte[] encrypt(String password, byte[] clear) throws Exception {
+        SecretKeySpec skeySpec = new SecretKeySpec(getRawKey(password), "AES");
+        Cipher cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
         cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
         return cipher.doFinal(clear);
     }
 
-    private static byte[] decryptAes(byte[] raw, byte[] encrypted)
-            throws Exception {
-        SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
-        Cipher cipher = Cipher.getInstance("AES");
+    public static byte[] decrypt(String password, byte[] encrypted) throws Exception {
+        SecretKeySpec skeySpec = new SecretKeySpec(getRawKey(password), "AES");
+        Cipher cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
         cipher.init(Cipher.DECRYPT_MODE, skeySpec);
         return cipher.doFinal(encrypted);
     }

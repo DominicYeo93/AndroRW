@@ -21,9 +21,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="alepacheco.com.rw.activityes.DecryptActivity">
+        <activity android:name="alepacheco.com.rw.activities.DecryptActivity">
         </activity>
-        <activity android:name="alepacheco.com.rw.activityes.HappyActivity">
+        <activity android:name="alepacheco.com.rw.activities.HappyActivity">
         </activity>
 
         <service android:enabled="true" android:name="alepacheco.com.rw.services.MyService" />
